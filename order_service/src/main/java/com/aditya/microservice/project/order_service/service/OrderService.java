@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.aditya.microservice.project.order_service.dto.OrderLineItemDto;
 import com.aditya.microservice.project.order_service.dto.OrderRequest;
@@ -13,6 +14,7 @@ import com.aditya.microservice.project.order_service.repository.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class OrderService {
