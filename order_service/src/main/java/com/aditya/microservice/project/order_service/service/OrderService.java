@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
 
     public void placeOrder(OrderRequest orderRequest) {
 
@@ -44,10 +44,10 @@ public class OrderService {
                 .toList();
 
         // Call inventory-service and get response array
-        StockResponse[] response = webClient.get()
+        StockResponse[] response = webClientBuilder.build().get()
                 .uri(uriBuilder -> uriBuilder
                         .scheme("http")
-                        .host("localhost")
+                        .host("inventory-service")
                         .port(8082)
                         .path("/api/inventory")
                         .queryParam("skuCodes", skuCodes) // IMPORTANT: skuCodes (plural)
