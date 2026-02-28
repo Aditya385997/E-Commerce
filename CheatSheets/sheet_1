@@ -1,0 +1,345 @@
+🚀 MICROSERVICES + SPRING BOOT COMPLETE CHEAT SHEET
+
+(From scratch to Discovery Server – Interview Ready)
+
+1️⃣ What We Built (High Level Architecture)
+
+We created:
+
+✅ Product Service
+
+✅ Inventory Service
+
+✅ Order Service
+
+✅ Eureka Discovery Server
+
+✅ MySQL integration
+
+✅ Inter-service communication using WebClient
+
+✅ Multiple instances of inventory-service (load balancing ready)
+
+Architecture
+
+Client → Order Service → Inventory Service
+                         ↓
+                    MySQL DB
+
+All services → register to → Eureka Server
+
+
+2️⃣ Microservices Basics (Interview Explanation)
+❓ What is Microservice Architecture?
+
+Each business capability runs as an independent service.
+
+Services have:
+
+Own database
+
+Own deployment
+
+Own scaling
+
+Communication happens via HTTP/REST.
+
+❓ Why Microservices?
+
+Independent scaling
+
+Fault isolation
+
+Independent deployment
+
+Technology flexibility
+
+Better team ownership
+
+3️⃣ Spring Boot Fundamentals We Used
+
+| Annotation                 | Purpose                     |
+| -------------------------- | --------------------------- |
+| `@SpringBootApplication`   | Entry point                 |
+| `@RestController`          | REST APIs                   |
+| `@Service`                 | Business logic              |
+| `@Repository`              | JPA DB layer                |
+| `@Entity`                  | JPA table mapping           |
+| `@Transactional`           | DB transaction management   |
+| `@Bean`                    | Manual bean creation        |
+| `@RequiredArgsConstructor` | Lombok dependency injection |
+
+4️⃣ Layered Architecture
+
+Controller → Service → Repository → Database
+
+5️⃣ JPA & Database Concepts
+We Learned:
+
+JpaRepository
+
+Derived queries:
+findBySkuCodeIn(List<String> skuCodes)
+
+ddl-auto=update
+
+Entity mapping
+
+SELECT * FROM inventory WHERE sku_code IN (?, ?, ?)
+
+DTO vs Entity (Very Important Interview Topic)
+Why DTO?
+
+Prevent exposing internal DB structure.
+
+Control response structure.
+
+Better decoupling between services.
+
+7️⃣ Inter-Service Communication (WebClient)
+
+webClient.get()
+    .uri(...)
+    .retrieve()
+    .bodyToMono(StockResponse[].class)
+    .block();
+
+
+Concepts Learned:
+
+WebClient = Non-blocking HTTP client.
+
+.block() makes it synchronous.
+
+Microservice → Microservice REST communication.
+
+JSON mapping to DTO.
+
+In production we should avoid .block() in reactive systems.
+
+8️⃣ Transaction Management
+
+@Transactional
+
+What it does:
+
+Opens DB transaction.
+
+Commits if success.
+
+Rolls back if exception.
+
+Important:
+
+Used readOnly=true for optimization.
+
+Interview Answer:
+
+Transaction ensures atomicity and consistency of database operations.
+
+9️⃣ Eureka Discovery Server
+
+Without Eureka Server
+Order → http://localhost:8082
+
+With eureka server
+Order → inventory-service
+
+What We Built:
+
+Created discovery-server module
+
+Added @EnableEurekaServer
+
+Added Spring Cloud dependency
+
+Eureka Client Setup (Inventory Service)
+
+eureka.client.service-url.defaultZone=http://localhost:8761/eureka
+
+Eureka Client 
+@EnableDiscoveryClient
+
+🔟 Multiple Instances & Load Balancing
+
+We set:
+
+server.port=0
+
+Meaning:
+
+Spring picks random available port.
+
+Then ran service twice → 2 instances registered.
+
+Important fix:
+
+eureka.instance.instance-id=${spring.application.name}:${local.server.port}
+1️⃣1️⃣ How Load Balancing Works
+
+When calling:
+
+http://inventory-service/api/inventory
+
+Spring Cloud LoadBalancer:
+
+Fetches all instances from Eureka
+
+Chooses one (round robin)
+
+Forwards request
+
+Interview Answer:
+
+Eureka handles service registry. LoadBalancer handles instance selection.
+
+1️⃣2️⃣ What That “DOWN” Instance Was
+
+Old stale registration
+
+Occurs when instance stops unexpectedly
+
+Removed after lease expiration
+
+Important properties:
+
+eureka.instance.lease-renewal-interval-in-seconds=30
+eureka.instance.lease-expiration-duration-in-seconds=90
+
+
+1️⃣3️⃣ Microservice Communication Flow (Place Order)
+
+Client sends order.
+
+Order service:
+
+Extracts SKU list
+
+Calls inventory service
+
+Inventory service:
+
+DB query using IN clause
+
+Returns list of StockResponse
+
+Order service:
+
+Checks .allMatch(StockResponse::isInStock)
+
+Saves order if true
+
+
+1️⃣4️⃣ Important Interview Questions
+❓ What is Eureka?
+
+Service registry that:
+
+Stores all running service instances.
+
+Allows dynamic service discovery.
+
+❓ Difference between Eureka Client and Server?
+
+Server → Registry
+
+Client → Registers itself & fetches others
+
+❓ What happens if Eureka server goes down?
+
+Services still run.
+
+But new registrations fail.
+
+Service discovery fails.
+
+❓ Why server.port=0?
+
+To allow multiple instances on same machine.
+
+❓ How does load balancing work?
+
+Spring Cloud LoadBalancer:
+
+Fetches instances
+
+Uses round-robin strategy
+
+❓ What is instance-id?
+
+Unique identity of each running service instance.
+
+❓ Why DTO in microservices?
+
+Decoupling
+
+Security
+
+Contract control
+
+❓ What is @Transactional?
+
+Manages DB commit/rollback automatically.
+
+
+1️⃣5️⃣ System Design View (Simple)
+                 ┌─────────────┐
+                 │   Eureka    │
+                 └─────┬───────┘
+                       │
+        ┌──────────────┼──────────────┐
+        │              │              │
+   Order Service   Inventory     Product
+                       Service      Service
+                         │
+                        MySQL
+1️⃣6️⃣ What We Haven’t Done Yet (Next Steps)
+
+API Gateway
+
+Circuit Breaker (Resilience)
+
+Asynchronous messaging (Kafka)
+
+Distributed tracing
+
+Docker
+
+Kubernetes
+
+Centralized config
+
+1️⃣7️⃣ Your Level Right Now
+
+You now understand:
+
+Spring Boot fundamentals
+
+REST APIs
+
+JPA
+
+Transactions
+
+WebClient
+
+Service discovery
+
+Load balancing
+
+Multi-instance deployment
+
+Real debugging
+
+That’s already solid mid-level backend knowledge.
+
+🎯 If Interviewer Asks:
+
+“Explain your microservice architecture.”
+
+You say:
+
+I built a Spring Boot microservice architecture with Order, Inventory, and Product services. Each service has its own database layer using JPA. Services communicate via WebClient. We used Eureka as a service registry for dynamic service discovery and enabled multiple instances using random ports for scalability. Load balancing is handled by Spring Cloud LoadBalancer. Transactions ensure data consistency during order placement.
+
+Clean. Confident. Done.
+
